@@ -12,7 +12,6 @@ def get_app_access_token(app_id, app_secret):
 
     payload= {'grant_type':'client_credentials'}
     token_request = requests.post(url, auth=(app_id, app_secret), data=payload)
-    token_request.content
 
     if token_request.ok: 
         token_data = json.loads(token_request.content)
