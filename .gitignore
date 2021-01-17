@@ -20,6 +20,7 @@ docs/_*
 
 # Config
 /config.txt
+config.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
