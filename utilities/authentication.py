@@ -1,7 +1,5 @@
 import requests
 import json
-import sys
-import config
 
 def get_app_access_token(app_id, app_secret):
     """

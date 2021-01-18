@@ -1,8 +1,6 @@
 #%%
-import requests
 from utilities import authentication
 from utilities import search
-import json
 import config
 
 

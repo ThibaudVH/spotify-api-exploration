@@ -1,7 +1,5 @@
 import requests
 import json
-import sys
-import config
 
 def artist(artist_name, auth_token):
     """
