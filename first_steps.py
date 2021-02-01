@@ -5,7 +5,8 @@ import config
 
 
 # request authentication token, 
-#TODO: would be good to initiate a session object that would be fed to other utilities? 
+#TODO: would be good to initiate a client object that would have the utilities as function, 
+# being instantiated by a authentication/session object call.
 
 appid = config.authentication['app_id']
 secret = config.authentication['app_secret']
