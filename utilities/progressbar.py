@@ -18,10 +18,11 @@ def printProgressBar (iteration, total, start_time='', prefix = '', suffix = '',
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    if pct>0 & start_time:
-        current_timespan = datetime.datetime.now()-start_time
-        eta = (current_timespan/pct)*100 + start_time
-        print(f'\r{prefix} |{eta} |{bar}| {percent}% {suffix}', end = printEnd)
+    if start_time:
+        if pct>0:
+            current_timespan = datetime.datetime.now()-start_time
+            eta = (current_timespan/pct)*100 + start_time
+            print(f'\r{prefix} |{eta} |{bar}| {percent}% {suffix}', end = printEnd)
     else:
         print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
     # Print New Line on Complete
