@@ -145,16 +145,15 @@ print('Import of General Music')
 df_generic = df_creation(generic_music,generic_music_cols)
 df_generic.to_csv('../data/itunes_library_generic.csv', index=False)
 
-
-#  Get Tracklists
-for item in list(main_dict[0]):
-    # print(item.tag, item.attrib, item.text)    
-    if item.tag=="array":
-        playlists_dict=item
-        tracklist=list(playlists_dict.findall('dict'))
-        # x=list(tracklist[11])
-        # for i in range(len(x)):
-        #     print(x[i].text)
+# #  Get Tracklists
+# for item in list(main_dict[0]):
+#     # print(item.tag, item.attrib, item.text)    
+#     if item.tag=="array":
+#         playlists_dict=item
+#         tracklist=list(playlists_dict.findall('dict'))
+#         # x=list(tracklist[11])
+#         # for i in range(len(x)):
+#         #     print(x[i].text)
 
 
 # %%
