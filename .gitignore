@@ -101,7 +101,6 @@ tillenv/
 .ipynb_checkpoints/
 
 # exclude data from source control by default
-data/
 *.csv
 
 # Mac OS-specific storage files
@@ -113,12 +112,10 @@ data/
 
 # Mypy cache
 .mypy_cache/
-/data
 
-
-# DVC
-/data
 
 #Other
 env/bin/
-emv/lib/
+env/lib/
+data/*
+!data/seed_tracks.csv
