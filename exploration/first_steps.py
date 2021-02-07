@@ -1,8 +1,11 @@
 #%%
+import sys
+from pathlib import Path
+sys.path.append(Path(__file__).parent.parent.absolute().as_posix())
+#%%
 from utilities import authentication
 from utilities import search
 import config
-
 
 # request authentication token, 
 #TODO: would be good to initiate a client object that would have the utilities as function, 

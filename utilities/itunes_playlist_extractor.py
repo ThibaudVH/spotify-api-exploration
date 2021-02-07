@@ -3,7 +3,6 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 from progressbar import printProgressBar
 import datetime
-
 #%%
 def music_df_creation(music_lib,cols):
     """
@@ -65,10 +64,11 @@ def playlist_df_creation(playlist_lib,cols):
         if master:
             continue
 
-        # Extract tracks composing that plist
+        # Extract tracks composing that plist. All tracks are in form of a dict containing their ID
         for j in range(len(tracks)):
-            if tracks[j].text == 'Track ID':
-                track_ids.append(tracks[j+1].text)
+            for k in range(len(tracks[j])):
+                if tracks[j][k].text == 'Track ID':
+                    track_ids.append(tracks[j][k+1].text)
         
         # Extract plist gen info into a general dataframe, making sure cols are in the same order        
         for c in cols:
@@ -157,7 +157,6 @@ def split_music_kind(tracklist):
                 break
     return podcast, purchased, apple_music, generic_music
 
-#%%
 # First import the iTunes Music Library xml and begin to parse it.
 # This XML deviates a lot from more classic XML implementation and some of its parsing may seem hacky/unconventional.
 # Expects library file in data folder
@@ -191,22 +190,20 @@ generic_music_cols = ['Persistent ID', 'Track ID', 'Artist', 'Name', 'Album', 'T
 # import tracks metadata in pandas dataframes and dump them into csv.
 print('Import of AppleMusic')
 df_apple_music = music_df_creation(apple_music,apple_music_cols)
-df_apple_music.to_csv('../data/itunes_library_apple_music.csv', index=False)
+df_apple_music.to_csv('../data/out/itunes_library_apple_music.csv', index=False)
 
 print('Import of Podcast')
 df_podcast = music_df_creation(podcast,podcast_cols)
-df_podcast.to_csv('../data/itunes_library_podcast.csv', index=False)
+df_podcast.to_csv('../data/out/itunes_library_podcast.csv', index=False)
 
 print('Import of Purchased Music')
 df_purchased = music_df_creation(purchased,purchased_cols)
-df_purchased.to_csv('../data/itunes_library_purchased.csv', index=False)
+df_purchased.to_csv('../data/out/itunes_library_purchased.csv', index=False)
 
 print('Import of General Music')
 df_generic = music_df_creation(generic_music,generic_music_cols)
-df_generic.to_csv('../data/itunes_library_generic.csv', index=False)
+df_generic.to_csv('../data/out/itunes_library_generic.csv', index=False)
 
-
-#%%
 # Reconstruct Playlists
 # Extract playlists from the library, which are located into an array
 playlist_array = extract_sub_node(main_dict, 'array')
@@ -218,7 +215,15 @@ plist_cols = get_existing_cols(playlists)
 plist_cols = ['Parent Persistent ID', 'Playlist Persistent ID', 'Playlist ID', 'Name']
 playlist_master_df, playlist_tracks_dfs = playlist_df_creation(playlists, plist_cols)
 
-# %%
-playlist_master_df.head(20)
-# playlist_master_df.columns
-# %%
+playlist_master_df.head(10)
+# df_generic.head(10)
+# playlist_tracks_dfs['40247'].head(5)
+
+playlist_full_content_dfs={}
+for key in playlist_tracks_dfs:
+    playlist_full_content_dfs[key] = pd.merge(left= playlist_tracks_dfs[key], right = df_generic, how='left', on='Track ID')
+
+for key in playlist_full_content_dfs:
+    # Get playlist name
+    plist_name = playlist_master_df.loc[playlist_master_df['Playlist ID']==key]['Name']
+    playlist_full_content_dfs[key].to_csv(f'../data/out/{plist_name}.csv', index=False)
