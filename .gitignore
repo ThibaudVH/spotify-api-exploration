@@ -82,7 +82,6 @@ target/
 
 # DotEnv configuration
 .env
-tillenv/
 
 # Database
 *.db
@@ -118,4 +117,4 @@ tillenv/
 env/bin/
 env/lib/
 data/*
-!data/seed_tracks.csv
+!data/*.example
