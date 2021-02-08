@@ -1,0 +1,6 @@
+authentication = {
+    'app_id' : 'YOUR SPOTIFY APP ID',
+    'app_secret' : 'YOUR SPOTIFY APP SECRET',
+    'app_redirect_url' : 'http://localhost:8080'
+}
+
