@@ -1,6 +1,6 @@
 authentication = {
     'app_id' : 'YOUR SPOTIFY APP ID',
     'app_secret' : 'YOUR SPOTIFY APP SECRET',
-    'app_redirect_url' : 'http://localhost:8080'
+    'app_redirect_url' : 'http://localhost:8080' # this should match your application redicrect url, see spotify authentication documentation
 }
 

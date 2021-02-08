@@ -40,7 +40,7 @@ for search_track in seed_tracklist:
         artist_names.append(artist['name'])
     artist_names = ', '.join(artist_names)
     print(track['name'], artist_names)
-    seed_tracks_uri.append(track['uri'] )
+    seed_tracks_uri.append(track['uri'])
 
 plist_name = input('Provide the name of the playlist youd like to create or modify:')
 plist_uri=''
