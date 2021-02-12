@@ -81,12 +81,13 @@ def add_tracks_to_playlist(tracks_to_add, plist_uri):
     tracks_to_add           - Required  : list of tracks URIs
     plist_uri               - Required  : playlist URI       
     """
-    if len(recommended_tracks_uri) > 100:
-        floor, remainder = divmod(len(recommended_tracks_uri), 100)
+    result=''
+    if len(tracks_to_add) > 100:
+        floor, remainder = divmod(len(tracks_to_add), 100)
         for i in range(floor):
-            result = sp.playlist_add_items(playlist_id=plist_uri, items=recommended_tracks_uri[i:(i+1)*100])
+            result = sp.playlist_add_items(playlist_id=plist_uri, items=tracks_to_add[i:(i+1)*100])
     else:
-        result = sp.playlist_add_items(playlist_id = plist_uri, items=seed_tracks_uri)
+        result = sp.playlist_add_items(playlist_id = plist_uri, items=tracks_to_add)
     return result
 
 # Initiate os env. variables for spotipy auth
@@ -126,11 +127,12 @@ print(plist_uri)
 #add seed-tracks to playlist
 sp_tracks_to_add_uri = np.setdiff1d(seed_tracks_uri, plist_existing_tracks_uri)
 result = add_tracks_to_playlist(tracks_to_add = seed_tracks_uri, plist_uri = plist_uri)
+print('Seed tracks added to the playlist')
 
-#Get recommendations for each tracks and put first 10 in the playlist
+#Get recommendations for each tracks and add to playlist
 recommended_tracks_uri = simple_recommendation_engine(seed_tracks_uri, plist_existing_tracks_uri)
-
-#add recommendations to playlist, max 100 tracks at a time
 result = add_tracks_to_playlist(tracks_to_add = recommended_tracks_uri, plist_uri = plist_uri)
+print('recommended tracks added to the playlist')
+
 
 
