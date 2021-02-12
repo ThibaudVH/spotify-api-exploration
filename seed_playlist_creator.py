@@ -1,4 +1,3 @@
-
 import numpy as np
 import csv
 import spotipy
@@ -74,7 +73,7 @@ def simple_recommendation_engine(seed_tracks_uri, plist_existing_tracks_uri = No
         recommended_tracks_to_add_uri = recommended_tracks_uri
     return set(recommended_tracks_to_add_uri)
 
-def add_tracks_to_playlist(tracks_to_add, plist_uri):
+def add_tracks_to_playlist(tracks_to_add, plist_uri, sp_client):
     """
     Add tracks to a specified playlist. Uses several operation if more than 100 tracks to add.
     @params:
@@ -85,9 +84,9 @@ def add_tracks_to_playlist(tracks_to_add, plist_uri):
     if len(tracks_to_add) > 100:
         floor, remainder = divmod(len(tracks_to_add), 100)
         for i in range(floor):
-            result = sp.playlist_add_items(playlist_id=plist_uri, items=tracks_to_add[i:(i+1)*100])
+            result = sp_client.playlist_add_items(playlist_id=plist_uri, items=tracks_to_add[i:(i+1)*100])
     else:
-        result = sp.playlist_add_items(playlist_id = plist_uri, items=tracks_to_add)
+        result = sp_client.playlist_add_items(playlist_id = plist_uri, items=tracks_to_add)
     return result
 
 # Initiate os env. variables for spotipy auth
@@ -126,12 +125,12 @@ print(plist_uri)
 
 #add seed-tracks to playlist
 sp_tracks_to_add_uri = np.setdiff1d(seed_tracks_uri, plist_existing_tracks_uri)
-result = add_tracks_to_playlist(tracks_to_add = seed_tracks_uri, plist_uri = plist_uri)
+result = add_tracks_to_playlist(tracks_to_add = seed_tracks_uri, plist_uri = plist_uri, sp_client=sp)
 print('Seed tracks added to the playlist')
 
 #Get recommendations for each tracks and add to playlist
 recommended_tracks_uri = simple_recommendation_engine(seed_tracks_uri, plist_existing_tracks_uri)
-result = add_tracks_to_playlist(tracks_to_add = recommended_tracks_uri, plist_uri = plist_uri)
+result = add_tracks_to_playlist(tracks_to_add = recommended_tracks_uri, plist_uri = plist_uri, sp_client=sp)
 print('recommended tracks added to the playlist')
 
 

@@ -225,5 +225,6 @@ for key in playlist_tracks_dfs:
 
 for key in playlist_full_content_dfs:
     # Get playlist name
-    plist_name = playlist_master_df.loc[playlist_master_df['Playlist ID']==key]['Name']
+    plist_name = playlist_master_df.loc[playlist_master_df['Playlist ID']==key]['Name'].values[0]
     playlist_full_content_dfs[key].to_csv(f'../data/out/{plist_name}.csv', index=False)
+# %%
