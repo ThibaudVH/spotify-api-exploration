@@ -112,7 +112,8 @@ target/
 # Mypy cache
 .mypy_cache/
 
-
+log/*
+logs/*
 #Other
 env/bin/
 env/lib/
