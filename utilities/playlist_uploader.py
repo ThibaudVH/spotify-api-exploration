@@ -18,17 +18,15 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--name', '-n', help = 'set the name of the playlist to be created or amended', required=True)
 parser.add_argument('--file', '-f', help = 'the file containing the tracks info to be added to the playlist', required=True)
 args = parser.parse_args()
-
 if not args.name:
-    print('error, must provide a non-empty playlist name')
-    exit()
+    raise argparse.ArgumentError('must provide a non-empty playlist name')
 if not args.file:
-    print('error, must provide a valid file containing the tracks to be added.')
-    exit()
+    raise argparse.ArgumentError('error, must provide a valid file containing the tracks to be added.')
 
 plist_name = args.name
 plist_file = args.file
-
+# plist_name = 'iTunes - Sun & Bass Vol. 3'
+# plist_file = 'data/out/Sun & Bass Vol. 3.csv'
 logger = getlogger('plist_upload')
 
 def search_tracks_uri (seed_querylist):
@@ -64,9 +62,10 @@ def add_tracks_to_playlist(tracks_to_add, plist_uri, sp_client):
     sp_client               - Required  : spotify client
     """
     result=''
-    playlist_tracks = sp.playlist_tracks(playlist_id=plist_uri)
-    for track in playlist_tracks['items']['tracks']:
-        plist_existing_tracks_uri.append(track['uri'])
+    plist_existing_tracks_uri=[]
+    playlist_tracks = sp_client.playlist_tracks(playlist_id=plist_uri,limit=None)
+    for item in playlist_tracks['items']:
+        plist_existing_tracks_uri.append(item['track']['uri'])
     sp_tracks_to_add_uri = np.setdiff1d(tracks_to_add, plist_existing_tracks_uri)
 
     if len(sp_tracks_to_add_uri) > 100:
@@ -108,6 +107,7 @@ def rework_track_names(x):
     x = x.lower()
     x = re.sub('\d\d - ', '', x)
     x = x.replace('original mix', '')
+    x = x.replace('original', '')
     x = x.replace('remix', '')
     x = x.replace('mix', '')
     x = x.replace("'", '')
@@ -118,6 +118,8 @@ def rework_track_names(x):
     x = x.replace(' -','')
     if (x.find('feat') != -1):
         x = x[0:x.find('feat')]
+    if (x.find('ft') != -1):
+        x = x[0:x.find('ft')]
     x = x.strip()
     return x
 
@@ -158,12 +160,8 @@ def get_create_playlist(plist_name, sp_client):
     return plist_uri
 
 # Load the information playlist we want to upload to spotify
-try:
-    plist_df = pd.read_csv(plist_file)
-    logger.info(f'loaded the playlist from {plist_file}')
-except:
-    logger.error(f'could not load the playlist info from {plist_file}')
-
+plist_df = pd.read_csv(plist_file)
+logger.info(f'loaded the playlist from {plist_file}')
 if not {'Name', 'Artist'}.issubset(plist_df.columns):
     raise IOError(f'the file {plist_file} does not contain valid Artist and Name columns')
 
@@ -199,7 +197,7 @@ not_found_df = plist_df.loc[plist_df['spotify_uri']=='']
 logger.info(f'out of {len(plist_df)} tracks, {len(not_found_df)} tracks were not matched')
 
 # Get/Create the Spotify playlist
-plist_uri, plist_existing_tracks_uri = get_create_playlist(plist_name)
+plist_uri = get_create_playlist(plist_name, sp)
 
 #add tracks to playlist
 tracks_to_add_uri = plist_df.loc[plist_df['spotify_uri']!='']['spotify_uri']
