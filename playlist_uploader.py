@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
-import sys
 from pathlib import Path
 import os
-import csv
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth, SpotifyOauthError 
 import config
