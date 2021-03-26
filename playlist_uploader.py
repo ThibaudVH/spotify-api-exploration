@@ -3,15 +3,13 @@ import pandas as pd
 import sys
 from pathlib import Path
 import os
-from pandas.core.base import DataError
-sys.path.append(Path(__file__).parent.parent.absolute().as_posix())
 import csv
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth, SpotifyOauthError 
 import config
 import re
 import argparse
-from logutil import getlogger
+from utilities.logutil import getlogger
 
 
 parser = argparse.ArgumentParser()
@@ -19,7 +17,7 @@ parser.add_argument('--name', '-n', help = 'set the name of the playlist to be c
 parser.add_argument('--file', '-f', help = 'the file containing the tracks info to be added to the playlist', required=True)
 args = parser.parse_args()
 if not args.name:
-    raise argparse.ArgumentError('must provide a non-empty playlist name')
+    raise argparse.ArgumentError('must provide a non-empty string as playlist name')
 if not args.file:
     raise argparse.ArgumentError('error, must provide a valid file containing the tracks to be added.')
 
