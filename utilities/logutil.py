@@ -3,7 +3,7 @@ import datetime
 
 def getlogger(name):
     # create logger
-    current_date = datetime.datetime.now().strftime('%m%d%Y_%H%M%s')
+    current_date = datetime.datetime.now().strftime('%m%d%Y_%H%M%S')
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
     # create file handler which logs even debug messages
