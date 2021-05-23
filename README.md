@@ -12,5 +12,7 @@ If the name of the playlist does not match any playlist from the user, a new pla
 ## playlist_uploader.py
 This script will upload a playlist to Spotify based on a csv containing track informations (track name, track artist). you must specify the --name of the playlist and --file containing the track informtion when running the script.
 
+## add_currently_paying.py
+This script will take a playlist name as an argument and add the currently playing track in spotify to this playlist, if found in the user's playlists. This script will not create the playlist if not found.
 
 
