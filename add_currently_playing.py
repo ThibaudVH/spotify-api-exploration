@@ -3,10 +3,8 @@ import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth, SpotifyOauthError 
 import config
-import re
 import argparse
 # from utilities.logutil import getlogger
-
 # logger = getlogger('add_currently_playing')
 
 parser = argparse.ArgumentParser()
@@ -28,7 +26,6 @@ try:
     # logger.info(f'Succesfully logged in to Spotify as {user_id}')
 except SpotifyOauthError as err:
     print(err.__class__.__name__ + ':' + str(err))
-
 # Get current playback
 request = sp.current_playback()
 if not request:
@@ -40,8 +37,7 @@ if (request['item']['type']=='track'):
 else:
     print ('Current playback is not a track.')
     exit()
-
-#Get target plist
+# Get target plist
 request= sp.current_user_playlists()
 plist_uri = None
 for plist in request['items']: #search existing playlist
@@ -51,7 +47,12 @@ for plist in request['items']: #search existing playlist
 if not plist_uri:
     print('Target playlist not found')
     exit()
+# Add to target plist
+plist_tracks = sp.playlist_tracks(plist_uri, limit=None)
+for item in plist_tracks['items']:
+    if track_uri == item['track']['uri']:
+        print (f'{track_name} already added to {plist_name}')
+        exit()
 request = sp.playlist_add_items(plist_uri, [track_uri])
 if request:
     print(f'Succesfully added {track_name} to {plist_name}')
-
