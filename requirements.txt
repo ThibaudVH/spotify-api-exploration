@@ -21,8 +21,6 @@ jupyter-core==4.7.0
 lazy-object-proxy==1.4.3
 MarkupSafe==1.1.1
 mccabe==0.6.1
-numpy==1.19.5
-pandas==1.2.1
 parso==0.8.1
 pexpect==4.8.0
 pickleshare==0.7.5
@@ -32,7 +30,7 @@ Pygments==2.7.4
 pylint==2.6.0
 python-dateutil==2.8.1
 pytz==2020.5
-pyzmq==21.0.1
+pyzmq
 requests==2.25.1
 six==1.15.0
 spotipy==2.16.1
