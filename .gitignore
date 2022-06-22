@@ -119,3 +119,4 @@ env/bin/
 env/lib/
 data/*
 !data/*.example
+cache.*
