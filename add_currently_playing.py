@@ -3,10 +3,13 @@ import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth, SpotifyOauthError 
 import config
+from pathlib import Path
+
 # from utilities.logutil import getlogger
 # logger = getlogger('add_currently_playing')
 
 def add_to_playlist(plist_name, verbose=False):
+    path = str(Path(__file__).parent.absolute())
     # Initiate os env. variables for spotipy auth
     os.environ['SPOTIPY_CLIENT_ID'] = config.authentication['app_id']
     os.environ['SPOTIPY_CLIENT_SECRET'] = config.authentication['app_secret']
@@ -15,7 +18,7 @@ def add_to_playlist(plist_name, verbose=False):
     #Initiate Spotipy Client
     scope = "user-library-read user-read-recently-played user-top-read playlist-modify-public playlist-modify-private playlist-read-private playlist-read-collaborative app-remote-control streaming user-read-playback-state user-modify-playback-state user-read-currently-playing"
     try:
-        sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope,show_dialog=False))
+        sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope,show_dialog=False, cache_path=path+'/cache.txt'))
         user_id = sp.me()['id']
         if verbose:
             print(f'Succesfully logged in to Spotify as {user_id}')

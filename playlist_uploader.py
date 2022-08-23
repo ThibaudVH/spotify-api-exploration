@@ -9,21 +9,6 @@ import argparse
 from utilities.logutil import getlogger
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--name', '-n', help = 'set the name of the playlist to be created or amended', required=True)
-parser.add_argument('--file', '-f', help = 'the file containing the tracks info to be added to the playlist', required=True)
-args = parser.parse_args()
-if not args.name:
-    raise argparse.ArgumentError('must provide a non-empty string as playlist name')
-if not args.file:
-    raise argparse.ArgumentError('error, must provide a valid file containing the tracks to be added.')
-
-plist_name = args.name
-plist_file = args.file
-# plist_name = 'iTunes - Sun & Bass Vol. 3'
-# plist_file = 'data/out/Sun & Bass Vol. 3.csv'
-logger = getlogger('plist_upload')
-
 def search_tracks_uri (seed_querylist):
     """
     Search for these tracks in the spotify catalog and get their uri. return a list of Spotify Track URIs
@@ -89,7 +74,7 @@ def search_match_spotify(row):
         sp_uri = track_found['uri']
     return [sp_uri, sp_artist, sp_track_name]
 
-def rework_track_names(x):
+def rework_track_names(x): #TODO: match better with fuzzy strings
     #create a set containing harmonic keys
     harmonic_keys=[]
     for i in range (1,13):
@@ -136,7 +121,7 @@ def get_create_playlist(plist_name, sp_client):
     Search for a playlist with that name in the user's owned playlists. 
     If not found, create a private, non-collaborative playlist with that name.
     @params:
-    plist_name          - Required  : list of queries for tracks to search.
+    plist_name          - Required  : name of the playlist to create/find
     sp_client           - Required  : Spotify Client
 
     """
@@ -154,55 +139,69 @@ def get_create_playlist(plist_name, sp_client):
         logger.info(f'Playlist {plist_name} not found in user existing playlists. Playlist created. Playlist URI: {plist_uri}')
     return plist_uri
 
-# Load the information playlist we want to upload to spotify
-plist_df = pd.read_csv(plist_file)
-logger.info(f'loaded the playlist from {plist_file}')
-if not {'Name', 'Artist'}.issubset(plist_df.columns):
-    raise IOError(f'the file {plist_file} does not contain valid Artist and Name columns')
+if __name__== "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--name', '-n', help = 'set the name of the playlist to be created or amended', required=True)
+    parser.add_argument('--file', '-f', help = 'the file containing the tracks info to be added to the playlist', required=True)
+    args = parser.parse_args()
+    if not args.name:
+        raise argparse.ArgumentError('must provide a non-empty string as playlist name')
+    if not args.file:
+        raise argparse.ArgumentError('error, must provide a valid file containing the tracks to be added.')
 
-    
-# Initiate os env. variables for spotipy auth
-os.environ['SPOTIPY_CLIENT_ID'] = config.authentication['app_id']
-os.environ['SPOTIPY_CLIENT_SECRET'] = config.authentication['app_secret']
-os.environ['SPOTIPY_REDIRECT_URI'] = config.authentication['app_redirect_url']
+    plist_name = args.name
+    plist_file = args.file
+    logger = getlogger('plist_upload')
 
-#Initiate Spotipy Client
-scope = "user-library-read user-read-recently-played user-top-read playlist-modify-public playlist-modify-private playlist-read-private playlist-read-collaborative app-remote-control streaming user-read-playback-state user-modify-playback-state user-read-currently-playing"
-try:
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope,show_dialog=False))
-    user_id = sp.me()['id']
-    logger.info(f'Succesfully logged in to Spotify as {user_id}')
-except SpotifyOauthError as err:
-    logger.error(err.__class__.__name__ + ':' + str(err))
+    # Load the information playlist we want to upload to spotify
+    plist_df = pd.read_csv(plist_file)
+    logger.info(f'loaded the playlist from {plist_file}')
+    if not {'Name', 'Artist'}.issubset(plist_df.columns):
+        raise IOError(f'the file {plist_file} does not contain valid Artist and Name columns')
 
-# Rework some strings so that they are matched easily when querying Spotify
-plist_df['simplified_name'] = plist_df['Name'].apply(rework_track_names)
-plist_df['simplified_artist'] = plist_df['Artist'].apply(rework_artist_names)
+        
+    # Initiate os env. variables for spotipy auth
+    os.environ['SPOTIPY_CLIENT_ID'] = config.authentication['app_id']
+    os.environ['SPOTIPY_CLIENT_SECRET'] = config.authentication['app_secret']
+    os.environ['SPOTIPY_REDIRECT_URI'] = config.authentication['app_redirect_url']
 
-#Generate the queries for each track 
-plist_df['query'] = plist_df.apply(lambda row: 'track:' + str(row['simplified_name']) + ' artist:' + str(row['simplified_artist']), axis=1)
-queries = list(plist_df['query'])
-logger.info('Spotify queries generated from playlist file, now querying Spotify API')
+    #Initiate Spotipy Client
+    scope = "user-library-read user-read-recently-played user-top-read playlist-modify-public playlist-modify-private playlist-read-private playlist-read-collaborative app-remote-control streaming user-read-playback-state user-modify-playback-state user-read-currently-playing"
+    try:
+        sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope,show_dialog=False))
+        user_id = sp.me()['id']
+        logger.info(f'Succesfully logged in to Spotify as {user_id}')
+    except SpotifyOauthError as err:
+        logger.error(err.__class__.__name__ + ':' + str(err))
 
-#Query Spotify to match the tracks
-found = plist_df.apply(search_match_spotify, axis=1, result_type='expand')
-columns = ['spotify_uri', 'spotify_artist', 'spotify_track_name']
-plist_df[columns] = found
-not_found_df = plist_df.loc[plist_df['spotify_uri']=='']
-logger.info(f'out of {len(plist_df)} tracks, {len(not_found_df)} tracks were not matched')
+    # Rework some strings so that they are matched easily when querying Spotify
+    plist_df['simplified_name'] = plist_df['Name'].apply(rework_track_names)
+    plist_df['simplified_artist'] = plist_df['Artist'].apply(rework_artist_names)
 
-# Get/Create the Spotify playlist
-plist_uri = get_create_playlist(plist_name, sp)
+    #Generate the queries for each track 
+    plist_df['query'] = plist_df.apply(lambda row: 'track:' + str(row['simplified_name']) + ' artist:' + str(row['simplified_artist']), axis=1)
+    queries = list(plist_df['query'])
+    logger.info('Spotify queries generated from playlist file, now querying Spotify API')
 
-#add tracks to playlist
-tracks_to_add_uri = plist_df.loc[plist_df['spotify_uri']!='']['spotify_uri']
-result = add_tracks_to_playlist(tracks_to_add = tracks_to_add_uri, plist_uri = plist_uri, sp_client=sp)
+    #Query Spotify to match the tracks
+    found = plist_df.apply(search_match_spotify, axis=1, result_type='expand')
+    columns = ['spotify_uri', 'spotify_artist', 'spotify_track_name']
+    plist_df[columns] = found
+    not_found_df = plist_df.loc[plist_df['spotify_uri']=='']
+    logger.info(f'out of {len(plist_df)} tracks, {len(not_found_df)} tracks were not matched')
 
-logger.info('Playlist upload completed.')
-if len(not_found_df)>0:
-    logger.info('Tracks not found:')
-    for track in not_found_df.itertuples():
-        track_name = getattr(track, 'Name')
-        track_artist = getattr(track, 'Artist')
-        track_query = getattr(track, 'query')
-        logger.info(f'{track_name} - {track_artist}, queried as {track_query}')
+    # Get/Create the Spotify playlist
+    plist_uri = get_create_playlist(plist_name, sp)
+
+    #add tracks to playlist
+    tracks_to_add_uri = plist_df.loc[plist_df['spotify_uri']!='']['spotify_uri']
+    result = add_tracks_to_playlist(tracks_to_add = tracks_to_add_uri, plist_uri = plist_uri, sp_client=sp)
+
+    logger.info('Playlist upload completed.')
+    if len(not_found_df)>0:
+        logger.info('Tracks not found:')
+        for track in not_found_df.itertuples():
+            track_name = getattr(track, 'Name')
+            track_artist = getattr(track, 'Artist')
+            track_query = getattr(track, 'query')
+            logger.info(f'{track_name} - {track_artist}, queried as {track_query}')
